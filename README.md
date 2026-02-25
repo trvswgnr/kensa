@@ -25,11 +25,11 @@ on top of that, frame lookahead compares each frame against adjacent frames in t
 
 ## installation
 
-kensa was written in Rust, and is currently only available as a binary release or built from source.
+kensa was written in Rust, and is currently only available as a binary release for macos or built from source.
 
 ### binary release
 
-if you're on a silicon mac, download the latest release from the [releases page](https://github.com/techsavvytravvy/kensa/releases).
+if you're on a silicon mac, download the latest release from the [releases page](https://github.com/trvswgnr/kensa/releases).
 
 ### build from source
 
