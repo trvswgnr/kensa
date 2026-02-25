@@ -133,32 +133,6 @@ each diff image is a 2x2 grid: video 1 and video 2 on top, amplified difference 
 
 the JSON report includes per-group and per-frame breakdowns:
 
-```json
-{
-  "video1": { "path": "ref.mp4", "frames": 34568, "fps": 23.976, "resolution": "1920x1080" },
-  "video2": { "path": "test.mp4", "frames": 34568, "fps": 23.976, "resolution": "1920x1080" },
-  "comparison": {
-    "frames_compared": 34568,
-    "significant_groups": 12,
-    "significant_frames": 47,
-    "percentage_different": 0.14
-  },
-  "statistics": {
-    "mse": { "mean": 3.42, "std": 18.91, "min": 0.0, "max": 412.7 },
-    "ssim": { "mean": 0.9987, "std": 0.0041, "min": 0.7823, "max": 1.0 }
-  },
-  "different_groups": [
-    {
-      "frames": "891-893",
-      "timestamp": "37.16s-37.25s",
-      "avg_ssim": 0.8234,
-      "avg_blob_diff_pixels": 24500,
-      "individual_frames": [ ... ]
-    }
-  ]
-}
-```
-
 ## how the detection works
 
 kensa uses a tiered detection system to separate real visual differences from encoder noise.
@@ -189,7 +163,7 @@ flowchart TB
     F --> G["flush diff images<br>to disk"]
 ```
 
-the reader thread handles sequential video decoding (OpenCV's `VideoCapture` isn't thread-safe) while the processing side parallelizes the expensive per-frame comparisons across all available cores. backpressure via the bounded channel keeps memory usage stable regardless of video length.
+the reader thread handles sequential video decoding (OpenCV's `VideoCapture` isn't thread-safe) while the processing side parallelizes the expensive per-frame comparisons across available cores. backpressure via the bounded channel keeps memory usage stable regardless of video length.
 
 ## performance tips
 
