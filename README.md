@@ -93,9 +93,6 @@ kensa ref.mp4 test.mp4 --ssim-threshold 0.85 --diff-threshold 5.0 --blob-thresho
 
 # group frames to smooth out per-frame noise (e.g., average over 3 frames)
 kensa ref.mp4 test.mp4 --frame-group-size 3
-
-# disable lookahead if your videos are frame-accurately synced
-kensa ref.mp4 test.mp4 --no-frame-lookahead
 ```
 
 if you're missing real differences:
@@ -104,7 +101,7 @@ if you're missing real differences:
 # lower thresholds for stricter comparison
 kensa ref.mp4 test.mp4 --ssim-threshold 0.95 --mse-threshold 100 --blob-threshold 5000
 
-# enable local SSIM threshold to catch small localized changes
+# increase local SSIM threshold to catch small localized changes
 kensa ref.mp4 test.mp4 --local-ssim-threshold 0.3
 ```
 
@@ -168,7 +165,7 @@ kensa uses a tiered detection system to separate real visual differences from en
 
 primary triggers (any one of these flags a group): SSIM below threshold indicating overall structural change, diff percentage above threshold indicating widespread pixel differences, blob size above threshold indicating a coherent region of difference like subtitle text, or local SSIM strongly negative indicating clear localized structural damage.
 
-secondary triggers only fire when SSIM also shows some degradation (below 0.97): MSE above threshold, edge difference above threshold, or local SSIM below threshold.
+secondary triggers only fire when SSIM also shows some degradation: MSE above threshold, edge difference above threshold, or local SSIM below threshold.
 
 the two-tier approach means compression artifacts and minor encoding differences won't trigger false positives on their own, but genuine structural changes (like missing subtitles) get caught even if they're small relative to the full frame.
 
