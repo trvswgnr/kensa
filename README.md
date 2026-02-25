@@ -29,7 +29,7 @@ kensa was written in Rust, and is currently only available as a binary release o
 
 ### binary release
 
-download the latest release from the [releases page](https://github.com/techsavvytravvy/kensa/releases).
+if you're on a silicon mac, download the latest release from the [releases page](https://github.com/techsavvytravvy/kensa/releases).
 
 ### build from source
 
