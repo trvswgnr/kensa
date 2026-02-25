@@ -12,7 +12,7 @@ visually scrubbing through thousands of frames to find these differences is pret
 
 ## features
 
-kensa uses six comparison metrics working together to minimize false positives:
+kensa uses a combination of simple comparison metrics working together to minimize false positives:
 
 1. [MSE](https://en.wikipedia.org/wiki/Mean_squared_error) for raw pixel-level difference
 2. broad [SSIM](https://en.wikipedia.org/wiki/Structural_similarity_index_measure) for structural similarity across the full frame
