@@ -71,16 +71,16 @@ video1 is your reference (the "correct" render). video2 is what you're checking 
 
 ```bash
 # compare two renders, output to auto-named directory
-kensa reference.mkv test_render.mkv
+kensa reference.mp4 test_render.mp4
 
 # specify output directory
-kensa reference.mkv test_render.mkv -o ./results
+kensa reference.mp4 test_render.mp4 -o ./results
 
 # quick first pass at half resolution
-kensa reference.mkv test_render.mkv --fast-compare
+kensa reference.mp4 test_render.mp4 --fast-compare
 
 # skip saving diff images (faster, less disk usage)
-kensa reference.mkv test_render.mkv --no-images
+kensa reference.mp4 test_render.mp4 --no-images
 ```
 
 ### tuning for subtitle QC
@@ -89,23 +89,23 @@ the defaults are calibrated for catching ASS subtitle rendering differences in a
 
 ```bash
 # raise thresholds to only catch obvious issues
-kensa ref.mkv test.mkv --ssim-threshold 0.85 --diff-threshold 5.0 --blob-threshold 15000
+kensa ref.mp4 test.mp4 --ssim-threshold 0.85 --diff-threshold 5.0 --blob-threshold 15000
 
 # group frames to smooth out per-frame noise (e.g., average over 3 frames)
-kensa ref.mkv test.mkv --frame-group-size 3
+kensa ref.mp4 test.mp4 --frame-group-size 3
 
 # disable lookahead if your videos are frame-accurately synced
-kensa ref.mkv test.mkv --no-frame-lookahead
+kensa ref.mp4 test.mp4 --no-frame-lookahead
 ```
 
 if you're missing real differences:
 
 ```bash
 # lower thresholds for stricter comparison
-kensa ref.mkv test.mkv --ssim-threshold 0.95 --mse-threshold 100 --blob-threshold 5000
+kensa ref.mp4 test.mp4 --ssim-threshold 0.95 --mse-threshold 100 --blob-threshold 5000
 
 # enable local SSIM threshold to catch small localized changes
-kensa ref.mkv test.mkv --local-ssim-threshold 0.3
+kensa ref.mp4 test.mp4 --local-ssim-threshold 0.3
 ```
 
 ### all options
@@ -138,8 +138,8 @@ the JSON report includes per-group and per-frame breakdowns:
 
 ```json
 {
-  "video1": { "path": "ref.mkv", "frames": 34568, "fps": 23.976, "resolution": "1920x1080" },
-  "video2": { "path": "test.mkv", "frames": 34568, "fps": 23.976, "resolution": "1920x1080" },
+  "video1": { "path": "ref.mp4", "frames": 34568, "fps": 23.976, "resolution": "1920x1080" },
+  "video2": { "path": "test.mp4", "frames": 34568, "fps": 23.976, "resolution": "1920x1080" },
   "comparison": {
     "frames_compared": 34568,
     "significant_groups": 12,
