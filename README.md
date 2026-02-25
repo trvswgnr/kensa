@@ -118,7 +118,7 @@ kensa ref.mkv test.mkv --local-ssim-threshold 0.3
 | `--diff-threshold`       | `3.0`     | percentage of differing pixels to flag                                |
 | `--edge-threshold`       | `70.0`    | percentage of unmatched edges to flag                                 |
 | `--blob-threshold`       | `10000.0` | minimum contiguous diff region size (pixels) to flag                  |
-| `--local-ssim-threshold` | `0.0`     | minimum local SSIM to flag (0 = disabled)                             |
+| `--local-ssim-threshold` | `0.0`     | minimum local SSIM to flag                             |
 | `--save-frames`          | `500`     | max number of diff visualization images to save                       |
 | `--no-images`            | `false`   | skip saving diff images entirely                                      |
 | `--fast-compare`         | `false`   | compare at half resolution (4x faster)                                |
