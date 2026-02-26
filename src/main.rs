@@ -1532,7 +1532,7 @@ struct ThresholdsUsed {
     ssim_threshold: f64,
     diff_pct_threshold: f64,
     edge_diff_pct_threshold: f64,
-    blob_diff_pixels_threshold: f64,
+    blob_diff_pct_threshold: f64,
     local_ssim_threshold: f64,
 }
 
@@ -1561,7 +1561,7 @@ struct StatisticsInfo {
     ssim: StatBlock,
     diff_percentage: StatBlock,
     edge_diff_percentage: StatBlock,
-    blob_diff_pixels: StatBlock,
+    blob_diff_pct: StatBlock,
     min_local_ssim: StatBlock,
 }
 
@@ -1573,7 +1573,7 @@ struct GroupSummary {
     avg_ssim: f64,
     avg_diff_pct: f64,
     avg_edge_diff_pct: f64,
-    avg_blob_diff_pixels: f64,
+    avg_blob_diff_pct: f64,
     avg_min_local_ssim: f64,
     individual_frames: Vec<FrameSummary>,
 }
@@ -1585,7 +1585,7 @@ struct FrameSummary {
     ssim: f64,
     diff_pct: f64,
     edge_diff_pct: f64,
-    blob_diff_pixels: f64,
+    blob_diff_pct: f64,
     min_local_ssim: f64,
 }
 
@@ -1606,7 +1606,10 @@ fn build_summary(
         .iter()
         .map(|d| d.edge_diff_percentage)
         .collect();
-    let blob_diff_values: Vec<f64> = all_differences.iter().map(|d| d.blob_diff_pixels).collect();
+    let blob_diff_values: Vec<f64> = all_differences
+        .iter()
+        .map(|d| (d.blob_diff_pixels / frame_area) * 100.0)
+        .collect();
     let min_local_ssim_values: Vec<f64> =
         all_differences.iter().map(|d| d.min_local_ssim).collect();
 
@@ -1652,7 +1655,7 @@ fn build_summary(
                 ssim_threshold: thresholds.ssim,
                 diff_pct_threshold: thresholds.diff_pct,
                 edge_diff_pct_threshold: thresholds.edge_diff_pct,
-                blob_diff_pixels_threshold: (thresholds.blob_diff_pct / 100.0) * frame_area,
+                blob_diff_pct_threshold: thresholds.blob_diff_pct,
                 local_ssim_threshold: thresholds.local_ssim,
             },
         },
@@ -1661,7 +1664,7 @@ fn build_summary(
             ssim: build_stat_block(&ssim_values),
             diff_percentage: build_stat_block(&diff_values),
             edge_diff_percentage: build_stat_block(&edge_diff_values),
-            blob_diff_pixels: build_stat_block(&blob_diff_values),
+            blob_diff_pct: build_stat_block(&blob_diff_values),
             min_local_ssim: build_stat_block(&min_local_ssim_values),
         },
         warnings,
@@ -1682,7 +1685,7 @@ fn build_summary(
                 avg_ssim: round_n(g.avg_ssim, 4),
                 avg_diff_pct: round_n(g.avg_diff_percentage, 2),
                 avg_edge_diff_pct: round_n(g.avg_edge_diff_percentage, 2),
-                avg_blob_diff_pixels: round_n(g.avg_blob_diff_pixels, 0),
+                avg_blob_diff_pct: round_n((g.avg_blob_diff_pixels / frame_area) * 100.0, 2),
                 avg_min_local_ssim: round_n(g.avg_min_local_ssim, 4),
                 individual_frames: g
                     .individual_frames
@@ -1693,7 +1696,7 @@ fn build_summary(
                         ssim: round_n(f.ssim, 4),
                         diff_pct: round_n(f.diff_percentage, 2),
                         edge_diff_pct: round_n(f.edge_diff_percentage, 2),
-                        blob_diff_pixels: round_n(f.blob_diff_pixels, 0),
+                        blob_diff_pct: round_n((f.blob_diff_pixels / frame_area) * 100.0, 2),
                         min_local_ssim: round_n(f.min_local_ssim, 4),
                     })
                     .collect(),
