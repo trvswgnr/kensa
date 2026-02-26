@@ -20,9 +20,25 @@ fn main() {
         .args(["diff", "--quiet"])
         .output()
         .map(|o| !o.status.success())
-        .unwrap_or(false);
+        .unwrap_or(false)
+        || Command::new("git")
+            .args(["diff", "--cached", "--quiet"])
+            .output()
+            .map(|o| !o.status.success())
+            .unwrap_or(false);
 
     let suffix = if dirty { "-dirty" } else { "" };
     println!("cargo:rustc-env=GIT_COMMIT_HASH={}{}", hash, suffix);
+    if let Ok(o) = Command::new("git")
+        .args(["rev-parse", "--abbrev-ref", "HEAD"])
+        .output()
+        && o.status.success()
+    {
+        let stdout = String::from_utf8(o.stdout).unwrap();
+        let branch = stdout.trim();
+        if branch != "HEAD" {
+            println!("cargo:rerun-if-changed=.git/refs/heads/{}", branch);
+        }
+    }
     println!("cargo:rerun-if-changed=.git/HEAD");
 }
