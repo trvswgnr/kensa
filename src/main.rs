@@ -16,11 +16,17 @@ use std::{
 };
 
 const OUTPUT: &str = "";
+/// Mean squared error between frames. Lower = more sensitive. Range: 0 to ~65025.
 const MSE_THRESHOLD: f64 = 225.0;
+/// Structural similarity (1 = identical). Lower = more sensitive. Range: -1 to 1.
 const SSIM_THRESHOLD: f64 = 0.90;
+/// % of pixels differing by >30 grayscale levels. Lower = more sensitive. Range: 0 to 100.
 const DIFF_THRESHOLD: f64 = 3.0;
+/// % of unmatched edges (e.g. subtitles). Lower = more sensitive. Range: 0 to 100.
 const EDGE_THRESHOLD: f64 = 70.0;
+/// Size of largest contiguous difference region (pixels). Lower = more sensitive. Range: 0 to width×height.
 const BLOB_THRESHOLD: f64 = 10000.0;
+/// Min local SSIM in any region (secondary trigger). Higher = more sensitive. Range: -1 to 1.
 const LOCAL_SSIM_THRESHOLD: f64 = 0.0;
 const SAVE_FRAMES: usize = 500;
 const NO_IMAGES: bool = false;
