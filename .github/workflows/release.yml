@@ -22,8 +22,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install OpenCV
-        run: sudo apt-get update && sudo apt-get install -y libopencv-dev pkg-config
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y libopencv-dev pkg-config libclang-dev
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           bin: kensa
@@ -32,29 +32,16 @@ jobs:
           tar: unix
           zip: none
 
-  upload-macos-x64:
-    needs: create-release
-    runs-on: macos-13
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install OpenCV
-        run: brew install opencv
-      - uses: taiki-e/upload-rust-binary-action@v1
-        with:
-          bin: kensa
-          token: ${{ secrets.GITHUB_TOKEN }}
-          target: x86_64-apple-darwin
-          tar: unix
-          zip: none
-
   upload-macos-arm64:
     needs: create-release
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install OpenCV
-        run: brew install opencv
+      - name: Install OpenCV and LLVM
+        run: brew install opencv llvm
       - uses: taiki-e/upload-rust-binary-action@v1
+        env:
+          LIBCLANG_PATH: /opt/homebrew/opt/llvm/lib
         with:
           bin: kensa
           token: ${{ secrets.GITHUB_TOKEN }}
