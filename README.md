@@ -89,7 +89,7 @@ the defaults are calibrated for catching ASS subtitle rendering differences in a
 
 ```bash
 # raise thresholds to only catch obvious issues
-kensa ref.mp4 test.mp4 --ssim-threshold 0.85 --diff-threshold 5.0 --blob-threshold 15000
+kensa ref.mp4 test.mp4 --ssim-threshold 0.85 --diff-threshold 5.0 --blob-threshold 0.72
 
 # group frames to smooth out per-frame noise (e.g., average over 3 frames)
 kensa ref.mp4 test.mp4 --frame-group-size 3
@@ -99,7 +99,7 @@ if you're missing real differences:
 
 ```bash
 # lower thresholds for stricter comparison
-kensa ref.mp4 test.mp4 --ssim-threshold 0.95 --mse-threshold 100 --blob-threshold 5000
+kensa ref.mp4 test.mp4 --ssim-threshold 0.95 --mse-threshold 100 --blob-threshold 0.24
 
 # increase local SSIM threshold to catch small localized changes
 kensa ref.mp4 test.mp4 --local-ssim-threshold 0.3
@@ -114,7 +114,7 @@ kensa ref.mp4 test.mp4 --local-ssim-threshold 0.3
 | `--ssim-threshold`       | `0.90`    | SSIM below this flags a difference (higher = stricter)                |
 | `--diff-threshold`       | `3.0`     | percentage of differing pixels to flag                                |
 | `--edge-threshold`       | `70.0`    | percentage of unmatched edges to flag                                 |
-| `--blob-threshold`       | `10000.0` | minimum contiguous diff region size (pixels) to flag                  |
+| `--blob-threshold`       | `0.48`    | % of frame area for largest contiguous diff region to flag            |
 | `--local-ssim-threshold` | `0.0`     | minimum local SSIM to flag                             |
 | `--save-frames`          | `500`     | max number of diff visualization images to save                       |
 | `--no-images`            | `false`   | skip saving diff images entirely                                      |

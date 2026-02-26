@@ -17,15 +17,15 @@ use std::{
 
 const OUTPUT: &str = "";
 /// Mean squared error between frames. Lower = more sensitive. Range: 0 to ~65025.
-const MSE_THRESHOLD: f64 = 225.0;
+const MSE_THRESHOLD: f64 = 220.0;
 /// Structural similarity (1 = identical). Lower = more sensitive. Range: -1 to 1.
-const SSIM_THRESHOLD: f64 = 0.90;
+const SSIM_THRESHOLD: f64 = 0.85;
 /// % of pixels differing by >30 grayscale levels. Lower = more sensitive. Range: 0 to 100.
-const DIFF_THRESHOLD: f64 = 3.0;
+const DIFF_THRESHOLD: f64 = 2.5;
 /// % of unmatched edges (e.g. subtitles). Lower = more sensitive. Range: 0 to 100.
-const EDGE_THRESHOLD: f64 = 70.0;
-/// Size of largest contiguous difference region (pixels). Lower = more sensitive. Range: 0 to width×height.
-const BLOB_THRESHOLD: f64 = 10000.0;
+const EDGE_THRESHOLD: f64 = 65.0;
+/// % of frame area for largest contiguous difference region. Lower = more sensitive. Range: 0 to 100.
+const BLOB_THRESHOLD: f64 = 0.45;
 /// Min local SSIM in any region (secondary trigger). Higher = more sensitive. Range: -1 to 1.
 const LOCAL_SSIM_THRESHOLD: f64 = 0.0;
 const SAVE_FRAMES: usize = 500;
@@ -63,7 +63,7 @@ struct Thresholds {
     ssim: f64,
     diff_pct: f64,
     edge_diff_pct: f64,
-    blob_diff_pixels: f64,
+    blob_diff_pct: f64,
     local_ssim: f64,
 }
 
@@ -71,6 +71,7 @@ struct Thresholds {
 struct GroupProcessingConfig {
     frame_group_size: usize,
     thresholds: Thresholds,
+    frame_area: f64,
     save_diff_frames: bool,
     max_diff_frames_to_save: usize,
 }
@@ -129,7 +130,8 @@ struct FrameBatch {
 #[derive(Parser, Debug)]
 #[command(
     name = "kensa",
-    about = "Compare two videos frame-by-frame and identify differences."
+    about = "Compare two videos frame-by-frame and identify differences.",
+    version = concat!(env!("CARGO_PKG_VERSION"), "-alpha+", env!("GIT_COMMIT_HASH"))
 )]
 struct Cli {
     video1: String,
@@ -145,7 +147,7 @@ struct Cli {
     /// edge difference threshold (percentage of unmatched edges to flag as different)
     #[arg(long = "edge-threshold", default_value_t = EDGE_THRESHOLD)]
     edge_threshold: f64,
-    /// blob threshold: minimum size (in pixels) of a contiguous difference region to flag as significant
+    /// blob threshold: % of frame area for largest contiguous diff region to flag as significant
     #[arg(long = "blob-threshold", default_value_t = BLOB_THRESHOLD)]
     blob_threshold: f64,
     /// local SSIM threshold: minimum allowed local-structure similarity
@@ -209,7 +211,7 @@ fn run() -> Result<()> {
             ssim: args.ssim_threshold,
             diff_pct: args.diff_threshold,
             edge_diff_pct: args.edge_threshold,
-            blob_diff_pixels: args.blob_threshold,
+            blob_diff_pct: args.blob_threshold,
             local_ssim: args.local_ssim_threshold,
         },
         save_diff_frames: !args.no_images,
@@ -355,9 +357,15 @@ fn compare_videos(
 
     let pixel_threshold = 30i32;
 
+    let mut frame_area = (width1 as f64) * (height1 as f64);
+    if config.fast_compare {
+        frame_area /= 4.0;
+    }
+
     let group_config = GroupProcessingConfig {
         frame_group_size: config.frame_group_size,
         thresholds: config.thresholds,
+        frame_area,
         save_diff_frames: config.save_diff_frames,
         max_diff_frames_to_save: config.max_diff_frames_to_save,
     };
@@ -594,6 +602,7 @@ fn compare_videos(
         &video2_meta,
         config.frame_group_size,
         config.thresholds,
+        frame_area,
         warnings,
         &all_differences,
         &significant_groups,
@@ -1201,6 +1210,8 @@ fn process_complete_groups(
         return Ok((Vec::new(), HashMap::new()));
     }
 
+    let blob_threshold_pixels = (config.thresholds.blob_diff_pct / 100.0) * config.frame_area;
+
     let mut idx = 0usize;
     while idx + config.frame_group_size <= diffs.len() {
         let group_frames = &diffs[idx..idx + config.frame_group_size];
@@ -1212,7 +1223,7 @@ fn process_complete_groups(
         // indicate a clear localized structural difference (e.g., subtitle issues)
         let primary_trigger = avg_ssim < config.thresholds.ssim
             || avg_diff_pct > config.thresholds.diff_pct
-            || avg_blob_diff > config.thresholds.blob_diff_pixels
+            || avg_blob_diff > blob_threshold_pixels
             || avg_min_local_ssim < -0.1;
 
         // secondary triggers: metrics that can be affected by encoder noise
@@ -1266,7 +1277,7 @@ fn process_complete_groups(
         // indicate a clear localized structural difference (e.g., subtitle issues)
         let primary_trigger = avg_ssim < config.thresholds.ssim
             || avg_diff_pct > config.thresholds.diff_pct
-            || avg_blob_diff > config.thresholds.blob_diff_pixels
+            || avg_blob_diff > blob_threshold_pixels
             || avg_min_local_ssim < -0.1;
 
         // secondary triggers: metrics that can be affected by encoder noise
@@ -1583,6 +1594,7 @@ fn build_summary(
     video2_meta: &VideoMeta,
     frame_group_size: usize,
     thresholds: Thresholds,
+    frame_area: f64,
     warnings: Vec<String>,
     all_differences: &[FrameDifference],
     significant_groups: &[FrameGroupDifference],
@@ -1640,7 +1652,7 @@ fn build_summary(
                 ssim_threshold: thresholds.ssim,
                 diff_pct_threshold: thresholds.diff_pct,
                 edge_diff_pct_threshold: thresholds.edge_diff_pct,
-                blob_diff_pixels_threshold: thresholds.blob_diff_pixels,
+                blob_diff_pixels_threshold: (thresholds.blob_diff_pct / 100.0) * frame_area,
                 local_ssim_threshold: thresholds.local_ssim,
             },
         },
